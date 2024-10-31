@@ -13,3 +13,6 @@ class TabelaLivros(models.Model):
 
     class Meta:
         verbose_name = 'Tabela_Livro'
+
+    def __str__(self):
+        return self.nome_livro

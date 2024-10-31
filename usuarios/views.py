@@ -6,7 +6,14 @@ from hashlib import sha256
 from django.urls import reverse
 
 def login(request):
-    return render(request, 'login.html')
+    status = request.GET.get('status')
+    if status is not None:
+        status = int(status)
+    return render(request, 'login.html', {'status': status})
+
+def sair(request):
+    request.session.flush()
+    return redirect(f"{reverse('login')}")
 
 def cadastro(request):
     status = request.GET.get('status')
@@ -14,6 +21,21 @@ def cadastro(request):
         status = int(status)
     return render(request, 'cadastro.html', {'status': status})
 
+def valida_login(request):
+    email = request.POST.get('email')
+    senha = request.POST.get('senha')
+    
+    senha = sha256(senha.encode()).hexdigest() # Criptografando senha
+
+    usuario_existente = TabelaUsuarios.objects.filter(email=email).filter(senha=senha)
+
+    # Verificação de usuário existente
+    if len(usuario_existente) == 0: #inexistente
+        return redirect(f"{reverse('login')}?status=1")
+    elif len(usuario_existente) > 0: #existente
+        request.session['usuarios'] = usuario_existente[0].id
+        return redirect(f'/livros/home/?id_usuario={request.session["usuarios"]}')
+    
 
 def valida_cadastro(request):
     nome = request.POST.get('nome')

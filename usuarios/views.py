@@ -6,8 +6,7 @@ from hashlib import sha256
 from django.urls import reverse
 
 def login(request):
-    return HttpResponse('login')
-
+    return render(request, 'login.html')
 
 def cadastro(request):
     status = request.GET.get('status')
@@ -20,6 +19,7 @@ def valida_cadastro(request):
     nome = request.POST.get('nome')
     email = request.POST.get('email')
     senha = request.POST.get('senha')
+    repetesenha = request.POST.get('repetesenha')
 
     usuario_existente = TabelaUsuarios.objects.filter(email=email)
 
@@ -30,10 +30,15 @@ def valida_cadastro(request):
     # Validação do tamanho da senha
     if len(senha) < 8:
         return redirect(f"{reverse('cadastro')}?status=2")
+    
 
     # Verificação de usuário existente
     if len(usuario_existente) > 0:
         return redirect(f"{reverse('cadastro')}?status=3")
+
+    if senha != repetesenha:
+        return redirect(f"{reverse('cadastro')}?status=4")
+
 
     try:
         # Criação de hash da senha e salvamento do usuário
@@ -43,4 +48,6 @@ def valida_cadastro(request):
         return redirect(f"{reverse('cadastro')}?status=0")
     except Exception as e:
         # Em caso de erro, status 4
-        return redirect(f"{reverse('cadastro')}?status=4")
+        return redirect(f"{reverse('cadastro')}?status=5")
+    
+

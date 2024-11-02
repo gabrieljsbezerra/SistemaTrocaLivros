@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date
+from usuarios.models import TabelaUsuarios
 
 class TabelaCategorias(models.Model):
     nome_categoria = models.CharField(max_length=30)
@@ -21,6 +22,7 @@ class TabelaLivros(models.Model):
     categoria = models.ForeignKey(TabelaCategorias, on_delete=models.DO_NOTHING)
     braile = models.BooleanField(default=False)
     data_cadastro = models.DateField(default=date.today)
+    usuario = models.ForeignKey(TabelaUsuarios, on_delete=models.DO_NOTHING)
 
     class Meta:
         verbose_name = 'Tabela_Livro'

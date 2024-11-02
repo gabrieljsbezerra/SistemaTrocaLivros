@@ -1,5 +1,7 @@
 from django.contrib import admin
-from . models import TabelaLivros
+from . models import TabelaLivros, TabelaCategorias
 
-#Registrando minha tabela de Livros na parte administrativa
+#Registrando minhas tabelas na parte administrativa
 admin.site.register(TabelaLivros)
+
+admin.site.register(TabelaCategorias)

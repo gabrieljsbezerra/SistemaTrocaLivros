@@ -13,7 +13,7 @@ def login(request):
 
 def sair(request):
     request.session.flush()
-    return redirect(f"{reverse('login')}")
+    return redirect(f"{reverse('login')}?status=3")
 
 def cadastro(request):
     status = request.GET.get('status')

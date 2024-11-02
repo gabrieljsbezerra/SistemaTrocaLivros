@@ -8,6 +8,6 @@ def home(request):
     if request.session.get('usuarios'):
         usuario = TabelaUsuarios.objects.get(
             id=request.session['usuarios']).nome_usuario
-        return HttpResponse(f'Olá, {usuario}')
+        return render(request, 'home.html')
     else:
         return redirect(f"{reverse('login')}?status=2")

@@ -1,1 +1,76 @@
 {% extends 'base_logado.html' %}
+
+{% block titulo %}Início - Sebo Online{% endblock %}
+
+{% block conteudo %}
+<!-- Banner Principal -->
+<section class="hero bg-light py-5 text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Bem-vindo ao Sebo Online!</h1>
+        <p class="lead">Troque, descubra e compartilhe livros com uma comunidade apaixonada por leitura!</p>
+        <a href="" class="btn btn-success btn-lg mt-3">Cadastre um Livro</a>
+        <a href="" class="btn btn-primary btn-lg mt-3">Comece a Trocar Livros</a>
+    </div>
+</section>
+
+<!-- Seção de Destaques -->
+<section class="features py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">O que oferecemos</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-box p-4 mb-4 bg-white shadow-sm rounded">
+                    <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                    <h4 class="fw-bold">Ampla Variedade de Livros</h4>
+                    <p>Explore uma vasta coleção de gêneros e títulos, desde clássicos até os lançamentos mais recentes.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box p-4 mb-4 bg-white shadow-sm rounded">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h4 class="fw-bold">Comunidade Ativa</h4>
+                    <p>Faça parte de uma rede de leitores, compartilhe suas experiências e conheça novos amigos!</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box p-4 mb-4 bg-white shadow-sm rounded">
+                    <i class="fas fa-exchange-alt fa-3x text-primary mb-3"></i>
+                    <h4 class="fw-bold">Trocas Seguras</h4>
+                    <p>Realize trocas com segurança e facilidade. Nossa plataforma garante uma experiência confiável.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Seção de Livros Populares -->
+<section class="popular-books bg-light py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Livros Populares</h2>
+        <div class="row">
+            {% for livro in livros_populares %}
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm h-100">
+                    <img src="https://graficarocha.com.br/wp-content/uploads/2018/04/livraria-1200x675.jpg" class="card-img-top" alt="{{ livro.nome_livro }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ livro.nome_livro }}</h5>
+                        <p class="card-text text-muted">{{ livro.autor }}</p>
+                        <a href="" class="btn btn-outline-primary">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Seção de Chamado para Ação -->
+<section class="cta py-5 text-center">
+    <div class="container">
+        <h2 class="fw-bold">Pronto para explorar novas leituras?</h2>
+        <p class="lead">Encontre o próximo livro para sua coleção ou compartilhe o seu com outros leitores.</p>
+        <a href="" class="btn btn-primary btn-lg mt-3">Ver Meus Livros</a>
+        <a href="" class="btn btn-outline-primary btn-lg mt-3">Explorar Trocas</a>
+    </div>
+</section>
+{% endblock %}

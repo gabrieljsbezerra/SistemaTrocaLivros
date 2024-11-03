@@ -1,0 +1,41 @@
+{% extends 'base_logado.html' %}
+
+{% block titulo %}Meus Livros - Sebo Online{% endblock %}
+
+{% block conteudo %}
+<div class="container">
+    <h1 class="text-center my-5">Meus Livros</h1>
+
+    <!-- Formulário de Pesquisa -->
+    <form method="GET" action="{% url 'meus_livros' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Pesquisar livro por título, autor ou editora" value="{{ request.GET.q }}">
+            <button class="btn btn-primary" type="submit">Pesquisar</button>
+        </div>
+    </form>
+
+    <!-- Lista de Livros -->
+    {% if livros %}
+        <div class="row">
+            {% for livro in livros %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ livro.nome_livro }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                        {% if livro.co_autor %}
+                            <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
+                        {% endif %}
+                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
+                        <p class="card-text"><strong>Disponível em Braile:</strong> {{ livro.braile|yesno:"Sim,Não" }}</p>
+                        <a href="" class="btn btn-primary mt-3 w-100">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center">Nenhum livro encontrado para sua pesquisa.</p>
+    {% endif %}
+</div>
+{% endblock %}

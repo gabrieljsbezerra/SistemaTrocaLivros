@@ -1,6 +1,11 @@
 {% extends 'base_logado.html' %}
-
+{% load static %}  <!-- Carregar a biblioteca de arquivos estáticos -->
 {% block titulo %}Meus Livros - Sebo Online{% endblock %}
+
+{% block head %}
+    <!-- Font Awesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}
 
 {% block conteudo %}
 <div class="container">
@@ -15,27 +20,44 @@
     </form>
 
     <!-- Lista de Livros -->
-    {% if livros %}
+    <div class="container mt-5">
+        <h2>Meus Livros</h2>
+
+            <!-- Botão para Cadastro de Novo Livro -->
+         <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'cadastro_livro' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Adicionar Novo Livro
+            </a>
+        </div>
         <div class="row">
-            {% for livro in livros %}
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm h-100">
+        {% for livro in livros %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    {% if livro.imagem_upload %}
+                        <img src="{{ livro.imagem_upload.url }}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="{{ livro.nome_livro }}">
+                    {% elif livro.imagem_link %}
+                        <img src="{{ livro.imagem_link }}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="{{ livro.nome_livro }}">
+                    {% else %}
+                        <img src="{% static 'images/default.jpg' %}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="Imagem não disponível">
+                    {% endif %}
                     <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ livro.nome_livro }}</h5>
-                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
-                        {% if livro.co_autor %}
-                            <p class="card-text"><strong>Co-autor:</strong> {{ livro.co_autor }}</p>
-                        {% endif %}
-                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
-                        <p class="card-text"><strong>Disponível em Braile:</strong> {{ livro.braile|yesno:"Sim,Não" }}</p>
-                        <a href="" class="btn btn-primary mt-3 w-100">Ver Detalhes</a>
+                        <h5 class="card-title" style="font-size: 1.1em;">{{ livro.nome_livro }}</h5>
+                        <p class="card-text mb-1" style="font-size: 0.9em;">Autor: {{ livro.autor }}</p>
+                        <p class="card-text mb-1" style="font-size: 0.9em;">Editora: {{ livro.editora }}</p>
+                        <!-- Ícones com tamanho reduzido -->
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted" style="font-size: 0.8em;">
+                                <i class="fas fa-calendar-alt me-1"></i> {{ livro.data_cadastro|date:"M-Y" }}
+                            </span>
+                            <span class="text-muted" style="font-size: 0.8em;">
+                                <a href="{% url 'ver_livro' livro.id %}" class="fas fa-book me-1"></a>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+        {% endfor %}
         </div>
-    {% else %}
-        <p class="text-center">Nenhum livro encontrado para sua pesquisa.</p>
-    {% endif %}
+    </div>
 </div>
 {% endblock %}

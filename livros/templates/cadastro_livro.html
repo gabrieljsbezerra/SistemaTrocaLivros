@@ -1,0 +1,86 @@
+{% extends 'base_logado.html' %}
+
+{% block titulo %}Cadastrar Novo Livro - Sebo Online{% endblock %}
+
+{% block conteudo %}
+<style>
+    html, body {
+        height: 100%;
+        background-color: #413130; /* Cor de fundo marrom */
+    }
+</style>
+<section class="vh-100" style="background-color: #413130;">
+    <div class="container h-100 d-flex justify-content-center align-items-center">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="card shadow-lg text-black" style="border-radius: 25px;">
+                    <div class="card-body p-md-5">
+                        {% if status == 0 %}
+                        <div class="alert alert-success" role="alert">
+                            Livro cadastrado com sucesso!
+                        </div>
+                        {% elif status == 1 %}
+                        <div class="alert alert-warning" role="alert">
+                            Campos obrigatórios não podem estar vazios!
+                        </div>
+                        {% elif status == 5 %}
+                        <div class="alert alert-danger" role="alert">
+                            Erro interno: não foi possível cadastrar o livro.
+                        </div>
+                        {% endif %}
+                        <div class="row justify-content-center">
+                            <div class="col-lg-6">
+                                <h3 class="text-center fw-bold mb-4">Cadastro de Novo Livro</h3>
+                                <form method="POST" action="{% url 'valida_cadastro_livro' %}">{% csrf_token %}
+                                    {% csrf_token %}
+                                    <div class="form-group mb-3">
+                                        <label for="nome_livro">Nome do Livro</label>
+                                        <input type="text" id="nome_livro" class="form-control" name="nome" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="autor">Autor</label>
+                                        <input type="text" id="autor" class="form-control" name="autor" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="editora">Editora</label>
+                                        <input type="text" id="editora" class="form-control" name="editora" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="categoria">Categoria</label>
+                                        <select id="categoria" name="categoria" class="form-control">
+                                            {% for categoria in categorias %}
+                                            <option value="{{ categoria.id }}">{{ categoria.nome_categoria }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="braile">Em Braile</label>
+                                        <input type="checkbox" id="braile" name="braile" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="imagem_link">Link da Imagem</label>
+                                        <input type="url" id="imagem_link" class="form-control" name="imagem_link" />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="imagem_upload">Upload de Imagem</label>
+                                        <input type="file" id="imagem_upload" class="form-control" name="imagem_upload" />
+                                        <small class="form-text text-muted">Você pode adicionar uma imagem por link ou fazer o upload direto do seu dispositivo.</small>
+                                    </div>
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg px-4">Cadastrar Livro</button>
+                                        <a href="{% url 'meus_livros' %}" class="btn btn-outline-secondary btn-lg px-4 ms-2">Cancelar</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-lg-6 d-flex align-items-center justify-content-center">
+                                <img src="https://img.freepik.com/fotos-gratis/linda-garota-feliz-em-levar-pilha-de-livros_23-2148464516.jpg"
+                                     class="img-fluid rounded" alt="Imagem de livros" style="border-radius: 15px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

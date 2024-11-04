@@ -23,6 +23,8 @@ class TabelaLivros(models.Model):
     braile = models.BooleanField(default=False)
     data_cadastro = models.DateField(default=date.today)
     usuario = models.ForeignKey(TabelaUsuarios, on_delete=models.DO_NOTHING)
+    imagem_link = models.URLField(blank=True, null=True)  # Link da imagem
+    imagem_upload = models.ImageField(upload_to='livros_imagens/', blank=True, null=True) # Upload da imagem
 
     class Meta:
         verbose_name = 'Tabela_Livro'

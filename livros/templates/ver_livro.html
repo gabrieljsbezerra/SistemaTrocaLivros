@@ -1,0 +1,44 @@
+{% extends 'base_logado.html' %}
+{% load static %}
+
+{% block titulo %}Detalhes do Livro - Sebo Online{% endblock %}
+
+{% block conteudo %}
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="row g-0">
+                    <!-- Imagem do livro -->
+                    <div class="col-md-4">
+                        {% if livro.imagem_upload %}
+                            <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% elif livro.imagem_link %}
+                            <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% else %}
+                            <img src="{% static 'images/default_book.jpg' %}" alt="Imagem padrão do livro" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% endif %}
+                    </div>
+                    <!-- Detalhes do livro -->
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h3 class="card-title text-primary">{{ livro.nome_livro }}</h3>
+                            <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                            {% if livro.co_autor %}
+                                <p class="card-text"><strong>Co-Autor:</strong> {{ livro.co_autor }}</p>
+                            {% endif %}
+                            <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
+                            <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria.nome_categoria }}</p>
+                            <p class="card-text"><strong>Cadastro em Braille:</strong> {{ livro.braile|yesno:"Sim,Não" }}</p>
+                            <p class="card-text"><strong>Data de Cadastro:</strong> {{ livro.data_cadastro|date:"d/m/Y" }}</p>
+                            <div class="text-center mt-4">
+                                <a href="{% url 'meus_livros' %}" class="btn btn-outline-secondary">Voltar aos Meus Livros</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

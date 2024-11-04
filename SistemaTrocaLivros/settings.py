@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     "livros",
     "usuarios"
 ]
+# Necessário para aguentar arquivos de imagem
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -9,10 +9,11 @@
 
 {% block conteudo %}
 <div class="container">
-    <h1 class="text-center my-5">Meus Livros</h1>
-
+    <br>
+    <h1 class="text-center display-4">Meus Livros</h1>
+    <br>
     <!-- Formulário de Pesquisa -->
-    <form method="GET" action="{% url 'meus_livros' %}" class="mb-4">
+    <form method="GET" action="{% url 'procura_livros' %}" class="mb-4">
         <div class="input-group">
             <input type="text" name="q" class="form-control" placeholder="Pesquisar livro por título, autor ou editora" value="{{ request.GET.q }}">
             <button class="btn btn-primary" type="submit">Pesquisar</button>
@@ -21,7 +22,6 @@
 
     <!-- Lista de Livros -->
     <div class="container mt-5">
-        <h2>Meus Livros</h2>
 
             <!-- Botão para Cadastro de Novo Livro -->
          <div class="d-flex justify-content-end mb-4">

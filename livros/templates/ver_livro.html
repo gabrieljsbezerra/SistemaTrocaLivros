@@ -5,6 +5,7 @@
 
 {% block conteudo %}
 <div class="container">
+    <h1 class="text-center display-4">Detalhes do Cadastro - Livro</h1>
     <div class="row justify-content-center my-5">
         <div class="col-md-10 col-lg-8">
             <div class="card shadow-lg border-0">
@@ -26,13 +27,17 @@
                             <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
                             {% if livro.co_autor %}
                                 <p class="card-text"><strong>Co-Autor:</strong> {{ livro.co_autor }}</p>
+                            {% else %}
+                            <p class="card-text"><strong>Co-Autor:</strong> - </p>
                             {% endif %}
                             <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
                             <p class="card-text"><strong>Categoria:</strong> {{ livro.categoria.nome_categoria }}</p>
                             <p class="card-text"><strong>Cadastro em Braille:</strong> {{ livro.braile|yesno:"Sim,Não" }}</p>
                             <p class="card-text"><strong>Data de Cadastro:</strong> {{ livro.data_cadastro|date:"d/m/Y" }}</p>
-                            <div class="text-center mt-4">
-                                <a href="{% url 'meus_livros' %}" class="btn btn-outline-secondary">Voltar aos Meus Livros</a>
+                            <br>
+                            <div class="text mt-4">
+                                <a href="{% url 'meus_livros' %}" class="btn btn-secondary">Voltar aos Meus Livros</a>
+                                <a href="{% url 'editar_livro' livro.id %}" class="btn btn-warning">Editar Livro</a>
                             </div>
                         </div>
                     </div>

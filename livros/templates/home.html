@@ -5,6 +5,11 @@
 {% block conteudo %}
 <!-- Banner Principal -->
 <section class="hero bg-light py-5 text-center">
+    {% if status == 1 %}
+    <div class="alert alert-warning" role="alert">
+        Acesso não autorizado. Este livro não está vinculado ao seu usuário!
+    </div>
+    {% endif %}
     <div class="container">
         <h1 class="display-4 fw-bold">Bem-vindo ao Sebo Online!</h1>
         <p class="lead">Troque, descubra e compartilhe livros com uma comunidade apaixonada por leitura!</p>

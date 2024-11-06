@@ -20,24 +20,54 @@ def home(request):
     
 def meus_livros(request):
     if request.session.get('usuarios'):
-        usuario = TabelaUsuarios.objects.get(id=request.session['usuarios']).nome_usuario
+        usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
+        livros = TabelaLivros.objects.filter(usuario = usuario)
+        return render(request, 'meus_livros.html', {'livros': livros})
+    else:
+        return redirect(f"{reverse('login')}?status=2")
+    
+def procura_livros(request):
+    if request.session.get('usuarios'):
+        usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
         query = request.GET.get('q', '')  # Obtém o termo de pesquisa
 
-        # Filtra os livros com base no termo de pesquisa
-        livros = TabelaLivros.objects.filter(
+        # Filtra os livros do usuário atual com base no termo de pesquisa
+        procura_livros = TabelaLivros.objects.filter(
             Q(nome_livro__icontains=query) | 
             Q(autor__icontains=query) | 
-            Q(editora__icontains=query)
-        ) if query else TabelaLivros.objects.all()
+            Q(editora__icontains=query),
+            usuario=usuario  # Restringe aos livros do usuário logado
+        ) if query else TabelaLivros.objects.filter(usuario=usuario)
 
-        return render(request, 'meus_livros.html', {'livros': livros, 'query': query})
+        return render(request, 'meus_livros.html', {'livros': procura_livros, 'query': query})
     else:
         return redirect(f"{reverse('login')}?status=2")
 
 def ver_livro(request, id):
-    livro = TabelaLivros.objects.get(id=id)
-    return render(request, 'ver_livro.html', {'livro':livro})
-    
+    if request.session.get('usuarios'):
+        livro = TabelaLivros.objects.get(id=id)
+        if request.session.get('usuarios') == livro.usuario.id:
+            return render(request, 'ver_livro.html', {'livro':livro})
+        else:
+            return redirect(f"{reverse('home')}?status=1")
+    else:
+        return redirect(f"{reverse('login')}?status=2")
+
+def editar_livro(request, id):
+    if request.session.get('usuarios'):
+        livro = TabelaLivros.objects.get(id=id)
+        categorias = TabelaCategorias.objects.all()
+        if request.session.get('usuarios') == livro.usuario.id:
+            return render(request, 'editar_livro.html', {'livro': livro, 'categorias': categorias})
+        else:
+            return redirect(f"{reverse('home')}?status=1")
+    else:
+        return redirect(f"{reverse('login')}?status=2")
+
+def alterar_livro(request, id):
+    pass
+
+
 def cadastro_livro(request):
     status = request.GET.get('status')
     if status is not None:

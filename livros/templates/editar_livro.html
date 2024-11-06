@@ -1,0 +1,67 @@
+{% extends 'base_logado.html' %}
+{% load static %}
+
+{% block titulo %}Detalhes do Livro - Sebo Online{% endblock %}
+
+{% block conteudo %}
+<style>
+    html, body {
+        height: 100%;
+        background-color: #ffc400; /* Cor de fundo marrom */
+    }
+</style>
+
+<div class="container">
+    <h1 class="text-center display-4" style="font-weight: bold; color: rgb(0, 0, 0);">Alteração de Cadastro - Livro</h1>
+    <div class="row justify-content-center my-5">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="row g-0">
+                    <!-- Imagem do livro -->
+                    <div class="col-md-4">
+                        {% if livro.imagem_upload %}
+                            <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% elif livro.imagem_link %}
+                            <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% else %}
+                            <img src="{% static 'images/default_book.jpg' %}" alt="Imagem padrão do livro" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                        {% endif %}
+                    </div>
+                    <!-- Detalhes do livro -->
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <p><strong>Nome do Livro: &nbsp;</strong><input class="card-text"  style="width: 400px" value="{{ livro.nome_livro }}"></p>
+                            <p><strong>Autor: &nbsp;</strong><input class="card-text" value="{{ livro.autor }}"></p>
+                            <p><strong>Co-Autor: &nbsp;</strong><input class="card-text" value="{{ livro.co_autor }}"></p>
+                            <p><strong>Editora: &nbsp;</strong><input class="card-text" value="{{ livro.editora }}"></p>
+                            <p><strong>Categoria: &nbsp;</strong>
+                                <select name="categoria">
+                                    <option>---Selecione a Categoria---</option>
+                                    {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}">{{ categoria.nome_categoria }}</option>
+                                    {% endfor %}
+
+                            </select></p>
+                            <p>{% if livro.braile %}
+                                <strong>Cadastro em Braile:  &nbsp;</strong><input style="transform: scale(1.5);" checked type="checkbox" name="braile">
+                            {% else %}
+                                <strong>Cadastro em Braile:  &nbsp;</strong><input style="transform: scale(1.5);" type="checkbox" name="braile">
+                            {% endif %}
+                            </p>
+                            <p><strong>Url Imagem: &nbsp;</strong><input type="url" id="imagem_link" class="form-control" name="imagem_link" value="{{ livro.imagem_link }}"/>
+                            <p><strong>Upload Imagem:</strong><input type="file" id="imagem_upload" class="form-control" name="imagem_upload" value="{{ livro.imagem_upload }}"/>
+                                <small class="form-text text-muted">Você pode adicionar uma imagem por link ou fazer o upload direto do seu dispositivo.</small></p>
+                            <p class="card-text"><strong>Data de Cadastro:</strong> {{ livro.data_cadastro|date:"d/m/Y" }}</p>
+                            <p class="card-text"><strong>Usuário:</strong> {{ livro.usuario }}</p>
+                            <div class="text-center mt-4">
+                                <input type="submit" class="btn btn-success" value="Salvar"></input>
+                                <a href="{% url 'ver_livro' livro.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

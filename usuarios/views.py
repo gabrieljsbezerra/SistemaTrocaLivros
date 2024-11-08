@@ -6,6 +6,8 @@ from hashlib import sha256
 from django.urls import reverse
 
 def login(request):
+    if request.session.get('usuario'):
+        return redirect('/livro/home/')
     status = request.GET.get('status')
     if status is not None:
         status = int(status)
@@ -16,6 +18,8 @@ def sair(request):
     return redirect(f"{reverse('login')}?status=3")
 
 def cadastro(request):
+    if request.session.get('usuario'):
+        return redirect('/livro/home/')
     status = request.GET.get('status')
     if status is not None:
         status = int(status)

@@ -1,9 +1,10 @@
+from django.forms import ValidationError
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.urls import reverse
 from usuarios.models import TabelaUsuarios
 from .models import TabelaLivros, TabelaCategorias
-from . import forms
+from .forms import CadastroLivro
 from django.db.models import Q
 from datetime import date
 from django.contrib import messages
@@ -65,72 +66,100 @@ def editar_livro(request, id):
         return redirect(f"{reverse('login')}?status=2")
 
 def alterar_livro(request, id):
-    pass
+    if request.method == 'POST':
+        try:
+            livro = TabelaLivros.objects.get(id=id)
+
+            # Atualizando os campos do livro com os dados do formulário
+            livro.nome_livro = request.POST.get('nome_livro')
+            livro.autor = request.POST.get('autor')
+            livro.co_autor = request.POST.get('co_autor')
+            livro.editora = request.POST.get('editora')
+
+            # Atualizando a categoria
+            categoria_id = request.POST.get('categoria')
+            livro.categoria_id = categoria_id
+
+            # Atualizando o campo Braile
+            livro.braile = 'braile' in request.POST
+
+            # Atualizando o link da imagem
+            imagem_link = request.POST.get('imagem_link')
+            if imagem_link:
+                livro.imagem_link = imagem_link
+
+            # Atualizando a imagem de upload
+            if 'imagem_upload' in request.FILES:
+                livro.imagem_upload = request.FILES['imagem_upload']
+
+            # Validando e salvando as alterações
+            livro.full_clean()  # Valida os campos
+            livro.save()
+
+            # Redirecionar para a página de detalhes do livro
+            return redirect(reverse('ver_livro', args=[livro.id]))
+        except ValidationError as e:
+            # Se houver erro de validação, renderize o formulário novamente com os erros
+            categorias = TabelaCategorias.objects.all()
+            return render(request, 'editar_livro.html', {
+                'livro': livro,
+                'categorias': categorias,
+                'errors': e.message_dict
+            })
+        except TabelaLivros.DoesNotExist:
+            return redirect(reverse('home'))
+    else:
+        return redirect(reverse('home'))
+    
 
 
 def cadastro_livro(request):
-    status = request.GET.get('status')
-    if status is not None:
-        status = int(status)
-    categorias = TabelaCategorias.objects.all()
-    return render(request, 'cadastro_livro.html', {'status': status, 'categorias': categorias})
+    if request.session.get('usuarios'):
+        status = request.GET.get('status')
+        if status is not None:
+            status = int(status)
+        categorias = TabelaCategorias.objects.all()
+        form = CadastroLivro()
+        return render(request, 'cadastro_livro.html', {'status': status, 'categorias': categorias, 'form': form})
+    else:
+        return redirect(f"{reverse('login')}?status=2")
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import TabelaLivros, TabelaCategorias
-from usuarios.models import TabelaUsuarios
-from django.contrib import messages
-from datetime import date
+from datetime import datetime
 
 def valida_cadastro_livro(request):
     if request.method == "POST":
-        # Obtenha os dados do formulário
-        nome_livro = request.POST.get("nome")
-        autor = request.POST.get("autor")
-        editora = request.POST.get("editora")
-        categoria_id = request.POST.get("categoria")
-        braile = request.POST.get("braile", False)
-        imagem_link = request.POST.get("imagem_link")
-        imagem_upload = request.FILES.get("imagem_upload")
-        
-        # Obtenha o usuário logado na tabela TabelaUsuarios
-        try:
-            usuario = TabelaUsuarios.objects.get(id=request.user.id)
-        except TabelaUsuarios.DoesNotExist:
-            messages.error(request, "Usuário inválido.")
-            return redirect("cadastro_livro")
+        form = CadastroLivro(request.POST, request.FILES)
+        if form.is_valid():
+            # Obter a data do formulário
+            data_cadastro_str = form.data.get('data_cadastro')
 
-        # Verifique se a categoria existe
-        try:
-            categoria = TabelaCategorias.objects.get(id=categoria_id)
-        except TabelaCategorias.DoesNotExist:
-            messages.error(request, "Categoria inválida.")
-            return redirect("cadastro_livro")
+            # Verificar se a data foi preenchida, caso contrário usar a data atual
+            if data_cadastro_str:
+                try:
+                    data_cadastro = datetime.strptime(data_cadastro_str, "%d/%m/%Y").date()
+                except ValueError:
+                    return redirect("cadastro_livro", status=5)
+            else:
+                data_cadastro = date.today()
 
-        # Validação dos campos obrigatórios
-        if not nome_livro or not autor or not editora or not categoria_id:
-            messages.error(request, "Todos os campos obrigatórios devem ser preenchidos.")
-            return redirect("cadastro_livro")
+            # Criar o objeto livro com os dados do formulário
+            livro = TabelaLivros(
+                nome_livro=form.data['nome_livro'],
+                autor=form.data['autor'],
+                co_autor=form.data.get('co_autor', ''),
+                editora=form.data['editora'],
+                categoria_id=form.data['categoria'],
+                braile=form.data.get('braile', False),
+                data_cadastro=data_cadastro,
+                usuario_id=request.session.get('usuarios'),
+                imagem_link=form.data['imagem_link'],
+                imagem_upload=form.files.get('imagem_upload')
+            )
 
-        # Crie o objeto do livro
-        livro = TabelaLivros(
-            nome_livro=nome_livro,
-            autor=autor,
-            editora=editora,
-            categoria=categoria,
-            braile=braile,
-            data_cadastro=date.today(),
-            usuario=usuario,
-            imagem_link=imagem_link,
-            imagem_upload=imagem_upload,
-        )
-
-        # Tente salvar o livro no banco de dados
-        try:
+            # Salvar o livro no banco de dados
             livro.save()
-            messages.success(request, "Livro cadastrado com sucesso!")
-            return redirect("meus_livros")  # Redireciona para a página de "Meus Livros"
-        except Exception as e:
-            messages.error(request, f"Erro ao cadastrar o livro: {e}")
-            return redirect("cadastro_livro")
+            return redirect("meus_livros")
+        else:
+            return redirect("cadastro_livro", status=1)
     else:
         return redirect("cadastro_livro")

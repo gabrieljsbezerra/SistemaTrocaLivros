@@ -1,68 +1,121 @@
 {% extends 'base_logado.html' %}
 {% load static %}
 
-{% block titulo %}Detalhes do Livro - Sebo Online{% endblock %}
+{% block titulo %}Alteração de Cadastro - Livro{% endblock %}
 
 {% block conteudo %}
 <style>
     html, body {
         height: 100%;
-        background-color: #ffc400; /* Cor de fundo marrom */
+        background-color: #ffc400;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .btn-custom {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    .book-image {
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 20px;
     }
 </style>
 
 <div class="container">
-    <h1 class="text-center display-4" style="font-weight: bold; color: rgb(0, 0, 0);">Alteração de Cadastro - Livro</h1>
-    <div class="row justify-content-center my-5">
+    <br><br>
+    <h1 class="text-center display-4 mb-5" style="color: rgb(0, 0, 0);">Alteração de Cadastro - Livro</h1>
+    <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8">
-            <div class="card shadow-lg border-0">
-                <div class="row g-0">
-                    <form action="#" method="POST">{% csrf_token %}
-                        <!-- Imagem do livro -->
-                        <div class="col-md-4">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <form action="{% url 'alterar_livro' livro.id %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Nome do Livro -->
+                        <div class="mb-3">
+                            <label for="nome_livro" class="form-label">Nome do Livro</label>
+                            <input type="text" id="nome_livro" name="nome_livro" class="form-control" value="{{ livro.nome_livro }}" required>
+                        </div>
+
+                        <!-- Autor -->
+                        <div class="mb-3">
+                            <label for="autor" class="form-label">Autor</label>
+                            <input type="text" id="autor" name="autor" class="form-control" value="{{ livro.autor }}" required>
+                        </div>
+
+                        <!-- Co-Autor -->
+                        <div class="mb-3">
+                            <label for="co_autor" class="form-label">Co-Autor</label>
+                            <input type="text" id="co_autor" name="co_autor" class="form-control" value="{{ livro.co_autor }}">
+                        </div>
+
+                        <!-- Editora -->
+                        <div class="mb-3">
+                            <label for="editora" class="form-label">Editora</label>
+                            <input type="text" id="editora" name="editora" class="form-control" value="{{ livro.editora }}" required>
+                        </div>
+
+                        <!-- Categoria -->
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">Categoria</label>
+                            <select id="categoria" name="categoria" class="form-select" required>
+                                <option value="">---Selecione a Categoria---</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}" {% if livro.categoria.id == categoria.id %}selected{% endif %}>
+                                        {{ categoria.nome_categoria }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Cadastro em Braile -->
+                        <label for="braile" class="form-check-label" style="font-weight: bold;" >Braile</label>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="braile" name="braile" class="form-check-input" {% if livro.braile %}checked{% endif %}>
+                        </div>
+
+                        <!-- Link da Imagem -->
+                        <div class="mb-3">
+                            <label for="imagem_link" class="form-label">URL da Imagem</label>
+                            <input type="url" id="imagem_link" name="imagem_link" class="form-control" value="{{ livro.imagem_link }}">
+                        </div>
+
+                        <!-- Upload da Imagem -->
+                        <div class="mb-3">
+                            <label for="imagem_upload" class="form-label">Upload da Imagem</label>
+                            <input type="file" id="imagem_upload" name="imagem_upload" class="form-control">
+                            <small class="form-text text-muted">Você pode adicionar uma imagem por link ou fazer o upload direto do seu dispositivo.</small>
+                        </div>
+                        <!-- Exibir Imagem do Livro -->
+                        <div class="text-center">
+                            <h5 class="mt-4">Imagem Atual do Livro</h5>
                             {% if livro.imagem_upload %}
-                                <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                                <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="book-image">
                             {% elif livro.imagem_link %}
-                                <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                                <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="book-image">
                             {% else %}
-                                <img src="{% static 'images/default_book.jpg' %}" alt="Imagem padrão do livro" class="img-fluid rounded-start" style="height: 100%; object-fit: cover; border-radius: 15px 0 0 15px;">
+                                <img src="{% static 'images/default_book.jpg' %}" alt="Imagem padrão do livro" class="book-image">
                             {% endif %}
                         </div>
-                        <!-- Detalhes do livro -->
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <p><strong>Nome do Livro: &nbsp;</strong><input class="card-text"  style="width: 400px" value="{{ livro.nome_livro }}"></p>
-                                <p><strong>Autor: &nbsp;</strong><input class="card-text" value="{{ livro.autor }}"></p>
-                                <p><strong>Co-Autor: &nbsp;</strong><input class="card-text" value="{{ livro.co_autor }}"></p>
-                                <p><strong>Editora: &nbsp;</strong><input class="card-text" value="{{ livro.editora }}"></p>
-                                <p><strong>Categoria: &nbsp;</strong>
-                                    <select name="categoria">
-                                        <option>---Selecione a Categoria---</option>
-                                        {% for categoria in categorias %}
-                                            {% if livro.categoria.nome_categoria == categoria.nome_categoria %}
-                                                <option selected>{{ categoria }}</option>
-                                            {% else %}
-                                                <option value="{{ categoria.id }}">{{ categoria.nome_categoria }}</option>
-                                            {% endif %}
-                                        {% endfor %}
 
-                                </select></p>
-                                <p>{% if livro.braile %}
-                                    <strong>Cadastro em Braile:  &nbsp;</strong><input style="transform: scale(1.5);" checked type="checkbox" name="braile">
-                                {% else %}
-                                    <strong>Cadastro em Braile:  &nbsp;</strong><input style="transform: scale(1.5);" type="checkbox" name="braile">
-                                {% endif %}
-                                </p>
-                                <p><strong>Url Imagem: &nbsp;</strong><input type="url" id="imagem_link" class="form-control" name="imagem_link" value="{{ livro.imagem_link }}"/>
-                                <p><strong>Upload Imagem:</strong><input type="file" id="imagem_upload" class="form-control" name="imagem_upload" value="{{ livro.imagem_upload }}"/>
-                                    <small class="form-text text-muted">Você pode adicionar uma imagem por link ou fazer o upload direto do seu dispositivo.</small></p>
-                                <p class="card-text"><strong>Data de Cadastro:</strong> {{ livro.data_cadastro|date:"d/m/Y" }}</p>
-                                <p class="card-text"><strong>Usuário:</strong> {{ livro.usuario }}</p>
-                                <div class="text-center mt-4">
-                                    <input type="submit" class="btn btn-success" value="Salvar"></input>
-                                    <a href="{% url 'ver_livro' livro.id %}" class="btn btn-outline-secondary">Cancelar</a>
-                                </div>
-                            </div>
+                        <!-- Botões -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success btn-custom">Salvar</button>
+                            <a href="{% url 'ver_livro' livro.id %}" class="btn btn-outline-secondary btn-custom">Cancelar</a>
                         </div>
                     </form>
                 </div>

@@ -1,32 +1,38 @@
+from datetime import datetime
 from django.forms import ValidationError
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponse
 from django.urls import reverse
 from usuarios.models import TabelaUsuarios
-from .models import TabelaLivros, TabelaCategorias
+from .models import TabelaLivros, TabelaCategorias, TabelaTrocas, Troca
 from .forms import CadastroLivro
 from django.db.models import Q
 from datetime import date
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 
 def home(request):
     if request.session.get('usuarios'):
-        usuario = TabelaUsuarios.objects.get(id=request.session['usuarios']).nome_usuario
+        usuario = TabelaUsuarios.objects.get(
+            id=request.session['usuarios']).nome_usuario
         livros = TabelaLivros.objects.all()
-        return render(request, 'home.html', {'livros':livros})
-        
+        return render(request, 'home.html', {'livros': livros})
+
     else:
         return redirect(f"{reverse('login')}?status=2")
-    
+
+
 def meus_livros(request):
     if request.session.get('usuarios'):
         usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
-        livros = TabelaLivros.objects.filter(usuario = usuario)
+        livros = TabelaLivros.objects.filter(usuario=usuario)
         return render(request, 'meus_livros.html', {'livros': livros})
     else:
         return redirect(f"{reverse('login')}?status=2")
-    
+
+
 def procura_livros(request):
     if request.session.get('usuarios'):
         usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
@@ -34,8 +40,8 @@ def procura_livros(request):
 
         # Filtra os livros do usuário atual com base no termo de pesquisa
         procura_livros = TabelaLivros.objects.filter(
-            Q(nome_livro__icontains=query) | 
-            Q(autor__icontains=query) | 
+            Q(nome_livro__icontains=query) |
+            Q(autor__icontains=query) |
             Q(editora__icontains=query),
             usuario=usuario  # Restringe aos livros do usuário logado
         ) if query else TabelaLivros.objects.filter(usuario=usuario)
@@ -44,15 +50,17 @@ def procura_livros(request):
     else:
         return redirect(f"{reverse('login')}?status=2")
 
+
 def ver_livro(request, id):
     if request.session.get('usuarios'):
         livro = TabelaLivros.objects.get(id=id)
         if request.session.get('usuarios') == livro.usuario.id:
-            return render(request, 'ver_livro.html', {'livro':livro})
+            return render(request, 'ver_livro.html', {'livro': livro})
         else:
             return redirect(f"{reverse('home')}?status=1")
     else:
         return redirect(f"{reverse('login')}?status=2")
+
 
 def editar_livro(request, id):
     if request.session.get('usuarios'):
@@ -64,6 +72,7 @@ def editar_livro(request, id):
             return redirect(f"{reverse('home')}?status=1")
     else:
         return redirect(f"{reverse('login')}?status=2")
+
 
 def alterar_livro(request, id):
     if request.method == 'POST':
@@ -110,7 +119,6 @@ def alterar_livro(request, id):
             return redirect(reverse('home'))
     else:
         return redirect(reverse('home'))
-    
 
 
 def cadastro_livro(request):
@@ -124,7 +132,6 @@ def cadastro_livro(request):
     else:
         return redirect(f"{reverse('login')}?status=2")
 
-from datetime import datetime
 
 def valida_cadastro_livro(request):
     if request.method == "POST":
@@ -136,7 +143,8 @@ def valida_cadastro_livro(request):
             # Verificar se a data foi preenchida, caso contrário usar a data atual
             if data_cadastro_str:
                 try:
-                    data_cadastro = datetime.strptime(data_cadastro_str, "%d/%m/%Y").date()
+                    data_cadastro = datetime.strptime(
+                        data_cadastro_str, "%d/%m/%Y").date()
                 except ValueError:
                     return redirect("cadastro_livro", status=5)
             else:
@@ -163,3 +171,91 @@ def valida_cadastro_livro(request):
             return redirect("cadastro_livro", status=1)
     else:
         return redirect("cadastro_livro")
+
+# Trocas
+
+
+def disponibilizar_para_troca(request, id):
+    if request.session.get('usuarios'):
+        livro = get_object_or_404(TabelaLivros, id=id)
+        if request.session.get('usuarios') == livro.usuario.id:
+            livro.disponivel_para_troca = True
+            livro.save()
+            return redirect('meus_livros')
+    return redirect('login')
+
+
+def detalhes_livro(request, id):
+    livro = get_object_or_404(TabelaLivros, id=id)
+    return render(request, 'detalhes_livro.html', {'livro': livro})
+
+
+def listar_livros_para_troca(request):
+    usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
+
+    # Livros do próprio usuário
+    livros_usuario = TabelaLivros.objects.filter(usuario=usuario, disponivel_para_troca=True)
+
+    # Livros de outros usuários disponíveis para troca
+    livros_outros = TabelaLivros.objects.filter(disponivel_para_troca=True).exclude(usuario=usuario)
+
+    # Obter as trocas solicitadas pelo usuário
+    trocas_solicitadas = TabelaTrocas.objects.filter(usuario_oferecedor=usuario)
+    trocas_dict = {troca.livro_solicitado_id: troca.status for troca in trocas_solicitadas}
+
+    # Adicionar o status de troca aos livros de outros usuários
+    for livro in livros_outros:
+        livro.status_troca = trocas_dict.get(livro.id, None)
+
+    context = {
+        'livros_usuario': livros_usuario,
+        'livros_outros': livros_outros,
+    }
+
+    return render(request, 'listar_livros_para_troca.html', context)
+
+
+
+
+def propor_troca(request, id):
+    if request.session.get('usuarios'):
+        livro_solicitado = get_object_or_404(TabelaLivros, id=id)
+        meus_livros = TabelaLivros.objects.filter(
+            usuario_id=request.session.get('usuarios'), disponivel_para_troca=False)
+
+        if request.method == 'POST':
+            livro_oferecido_id = request.POST.get('livro_oferecido')
+            livro_oferecido = TabelaLivros.objects.get(id=livro_oferecido_id)
+            nova_troca = TabelaTrocas(
+                livro_oferecido=livro_oferecido,
+                livro_solicitado=livro_solicitado,
+                usuario_oferecedor=livro_oferecido.usuario,
+                usuario_solicitante=livro_solicitado.usuario,
+                data_proposta=date.today(),
+                status='Pendente'
+            )
+            nova_troca.save()
+            return redirect('listar_livros_para_troca')
+        return render(request, 'propor_troca.html', {'livro_solicitado': livro_solicitado, 'meus_livros': meus_livros})
+    return redirect('login')
+
+
+def gerenciar_troca(request, id):
+    troca = get_object_or_404(TabelaTrocas, id=id)
+    if request.method == 'POST':
+        acao = request.POST.get('acao')
+        if acao == 'aceitar':
+            troca.status = 'Aceita'
+            troca.save()
+
+            # Transferir a propriedade dos livros
+            troca.livro_oferecido.usuario = troca.usuario_solicitante
+            troca.livro_oferecido.save()
+
+            troca.livro_solicitado.usuario = troca.usuario_oferecedor
+            troca.livro_solicitado.save()
+        elif acao == 'recusar':
+            troca.status = 'Rejeitada'
+            troca.save()
+        return redirect('listar_trocas')
+    return render(request, 'gerenciar_troca.html', {'troca': troca})

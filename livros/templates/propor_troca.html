@@ -1,0 +1,34 @@
+{% extends 'base_logado.html' %}
+{% load static %}
+{% block conteudo %}
+<div class="container mt-4">
+    <!-- Título -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">Propor Troca de Livro</h2>
+        <p class="text-muted">Escolha um dos seus livros para oferecer na troca.</p>
+    </div>
+
+    <!-- Formulário de Proposta de Troca -->
+    <div class="card shadow-sm p-4">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="livro_oferecido" class="form-label">Selecione o Livro para Oferecer:</label>
+                <select name="livro_oferecido" id="livro_oferecido" class="form-select">
+                    <option value="" disabled selected>Escolha seu livro...</option>
+                    {% for livro in meus_livros %}
+                    <option value="{{ livro.id }}">{{ livro.nome_livro }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Botão de Submissão -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-arrow-right-circle"></i> Propor Troca
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

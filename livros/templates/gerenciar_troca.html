@@ -1,0 +1,11 @@
+{% extends 'base_logado.html' %}
+{% block conteudo %}
+<h2>Gerenciar Troca</h2>
+<p>Livro Oferecido: {{ troca.livro_oferecido.nome_livro }}</p>
+<p>Livro Solicitado: {{ troca.livro_solicitado.nome_livro }}</p>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" name="acao" value="aceitar" class="btn btn-success">Aceitar</button>
+    <button type="submit" name="acao" value="recusar" class="btn btn-danger">Recusar</button>
+</form>
+{% endblock %}

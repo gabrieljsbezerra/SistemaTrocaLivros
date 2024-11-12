@@ -1,0 +1,92 @@
+{% extends 'base_logado.html' %}
+{% load static %}
+{% block conteudo %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">📚 Livros para Troca</h2>
+
+    <!-- Seção 1: Livros do Próprio Usuário -->
+    <h4 class="text-center mb-3">🔍 Seus Livros Disponíveis para Troca</h4>
+    <div class="row justify-content-center">
+        {% if livros_usuario %}
+            {% for livro in livros_usuario %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card shadow-sm h-100 border-primary">
+                    <!-- Imagem do Livro -->
+                    {% if livro.imagem_upload %}
+                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
+                    {% elif livro.imagem_link %}
+                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top img-fluid rounded">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ livro.nome_livro }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
+                        <p class="card-text text-muted"><small>Cadastrado em: {{ livro.data_cadastro|date:"d/m/Y" }}</small></p>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-info-circle"></i> Detalhes
+                            </a>
+                            <button class="btn btn-secondary btn-sm" disabled><i class="fas fa-lock"></i> Disponibilizado</button>
+                        </div>
+                    </div>
+                    <a href="{% url 'gerenciar_troca' livro.id %}" class="btn btn-success btn-sm">Gerenciar Troca</a>
+                </div>
+            </div>
+            
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">🚫 Você não disponibilizou nenhum livro para troca.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Seção 2: Livros de Outros Usuários -->
+    <h4 class="text-center mb-3">🌍 Livros de Outros Usuários Disponíveis para Troca</h4>
+    <div class="row justify-content-center">
+        {% if livros_outros %}
+            {% for livro in livros_outros %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card shadow-sm h-100 border-success">
+                    <!-- Imagem do Livro -->
+                    {% if livro.imagem_upload %}
+                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
+                    {% elif livro.imagem_link %}
+                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top img-fluid rounded">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ livro.nome_livro }}</h5>
+                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
+                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
+                        <p class="card-text text-muted"><small>Cadastrado em: {{ livro.data_cadastro|date:"d/m/Y" }}</small></p>
+
+                        <!-- Verificação do Status da Troca -->
+                        <!-- Verificação do Status da Troca -->
+                        {% if livro.status_troca == 'Pendente' %}
+                        <button class="btn btn-warning btn-sm" disabled><i class="fas fa-hourglass-half"></i> Troca Solicitada</button>
+                        {% elif livro.status_troca == 'Aceita' %}
+                        <button class="btn btn-success btn-sm" disabled><i class="fas fa-check-circle"></i> Troca Aceita</button>
+                        {% elif livro.status_troca == 'Rejeitada' %}
+                        <button class="btn btn-danger btn-sm" disabled><i class="fas fa-times-circle"></i> Troca Rejeitada</button>
+                        {% else %}
+                        <a href="{% url 'propor_troca' livro.id %}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-exchange-alt"></i> Propor Troca
+                        </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">🚫 Nenhum livro de outros usuários disponível para troca no momento.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

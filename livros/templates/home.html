@@ -51,33 +51,6 @@
     </div>
 </section>
 
-<!-- Espaço entre as seções -->
-<div class="my-5"></div>
-
-<!-- Seção de Livros Populares -->
-<section class="popular-books bg-light py-5">
-    <div class="container text-center">
-        <h2 class="fw-bold mb-4">Livros Populares</h2>
-        <div class="row">
-            {% for livro in livros_populares %}
-            <div class="col-md-3 mb-4">
-                <div class="card shadow-sm h-100">
-                    <img src="https://graficarocha.com.br/wp-content/uploads/2018/04/livraria-1200x675.jpg" class="card-img-top" alt="{{ livro.nome_livro }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ livro.nome_livro }}</h5>
-                        <p class="card-text text-muted">{{ livro.autor }}</p>
-                        <a href="#" class="btn btn-outline-primary">Ver Detalhes</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<!-- Espaço entre as seções -->
-<div class="my-5"></div>
-
 <!-- Seção de Chamado para Ação -->
 <section class="cta py-5 text-center">
     <div class="container">

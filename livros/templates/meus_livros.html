@@ -29,34 +29,31 @@
             <i class="fas fa-plus"></i> Adicionar Novo Livro
             </a>
         </div>
-        <div class="row">
-        {% for livro in livros %}
-            <div class="col-md-4">
-                <div class="card mb-4">
+        <div class="d-flex flex-wrap justify-content-center" style="gap: 10px;">
+            {% for livro in livros %}
+            <div class="card shadow-sm border-success rounded-2" style="max-width: 200px;">
+                <div class="position-relative">
                     {% if livro.imagem_upload %}
-                        <img src="{{ livro.imagem_upload.url }}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="{{ livro.nome_livro }}">
+                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
                     {% elif livro.imagem_link %}
-                        <img src="{{ livro.imagem_link }}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="{{ livro.nome_livro }}">
+                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
                     {% else %}
-                        <img src="{% static 'images/default.jpg' %}" class="card-img-top img-fluid" style="height: 600px; width: 100%; object-fit: cover;" alt="Imagem não disponível">
+                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
                     {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title" style="font-size: 1.1em;">{{ livro.nome_livro }}</h5>
-                        <p class="card-text mb-1" style="font-size: 0.9em;">Autor: {{ livro.autor }}</p>
-                        <p class="card-text mb-1" style="font-size: 0.9em;">Editora: {{ livro.editora }}</p>
-                        <!-- Ícones com tamanho reduzido -->
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted" style="font-size: 0.8em;">
-                                <i class="fas fa-calendar-alt me-1"></i> {{ livro.data_cadastro|date:"M-Y" }}
-                            </span>
-                            <span class="text-muted" style="font-size: 0.8em;">
-                                <a href="{% url 'ver_livro' livro.id %}" class="fas fa-book me-1"></a>
-                            </span>
-                        </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title text-truncate">{{ livro.nome_livro }}</h6>
+                    <p class="mb-1"><small><strong>Autor:</strong> {{ livro.autor }}</small></p>
+                    <p class="mb-1"><small><strong>Editora:</strong> {{ livro.editora }}</small></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted" style="font-size: 0.8em;">
+                            <i class="fas fa-calendar-alt me-1"></i> {{ livro.data_cadastro|date:"M-Y" }}
+                        </span>
+                        <a href="{% url 'ver_livro' livro.id %}" class="btn btn-outline-info btn-sm">Ver Livro</a>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+        {% endfor %}        
         </div>
     </div>
 </div>

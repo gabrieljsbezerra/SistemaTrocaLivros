@@ -1,35 +1,91 @@
 {% extends 'base_logado.html' %}
 {% load static %}
 {% block conteudo %}
-<div class="container mt-4">
+<style>
+    /* Estilo Personalizado */
+    .livro-card {
+        max-width: 200px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .livro-card:hover {
+        transform: scale(1.05);
+    }
+
+    .livro-card .card-img-top {
+        height: 300px;
+        object-fit: cover;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .troca-card {
+        border: 1px solid #17a2b8;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .container {
+        max-width: 1200px;
+    }
+
+    h4 {
+        font-weight: bold;
+    }
+
+    .gap-3 {
+        gap: 15px;
+    }
+
+    .main-content {
+        margin-right: 20%;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        width: 280px;
+    }
+</style>
+
+<div class="container mt-4 main-content">
     <h2 class="text-center mb-4 display-6">📚 Livros para Troca</h2>
 
-    <!-- Seção 1: Livros do Próprio Usuário -->
+    <!-- Seção: Seus Livros Disponíveis para Troca -->
     <h4 class="text-center mb-3">🔍 Seus Livros Disponíveis para Troca</h4>
-    <div class="d-flex flex-wrap justify-content-center" style="gap: 10px;">
+    <div class="d-flex flex-wrap justify-content-center gap-3">
         {% if livros_usuario %}
             {% for livro in livros_usuario %}
-            <div class="card shadow-sm border-primary rounded-2" style="max-width: 200px;">
+            <div class="card livro-card">
                 <div class="position-relative">
                     {% if livro.imagem_upload %}
-                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top">
                     {% elif livro.imagem_link %}
-                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top">
                     {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top">
                     {% endif %}
                 </div>
-                <div class="card-body p-2">
-                    <h6 class="card-title text-truncate">{{ livro.nome_livro }}</h6>
-                    <p class="mb-1"><small><strong>Autor:</strong> {{ livro.autor }}</small></p>
+                <div class="card-body">
+                    <h6 class="card-title">{{ livro.nome_livro }}</h6>
+                    <p class="text-muted"><strong>Autor:</strong> {{ livro.autor }}</p>
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-info btn-sm">Detalhes</a>
+                        <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-primary btn-sm">Detalhes</a>
                         {% if livro.status_troca == 'Pendente' %}
                             <a href="{% url 'gerenciar_troca' livro.troca_id %}" class="btn btn-primary btn-sm">Gerenciar</a>
-                        {% elif livro.status_troca == 'Aceita' %}
-                            <button class="btn btn-success btn-sm" disabled>Aceita</button>
-                        {% elif livro.status_troca == 'Rejeitada' %}
-                            <button class="btn btn-danger btn-sm" disabled>Rejeitada</button>
                         {% else %}
                             <button class="btn btn-secondary btn-sm" disabled>Indisponível</button>
                         {% endif %}
@@ -38,79 +94,73 @@
             </div>
             {% endfor %}
         {% else %}
-            <div class="col-12 text-center">
-                <p class="text-muted">🚫 Você não disponibilizou nenhum livro para troca.</p>
-            </div>
+            <p class="text-muted text-center">🚫 Nenhum livro disponível para troca.</p>
         {% endif %}
     </div>
 
-    <!-- Seção 2: Histórico de Trocas -->
-    <h4 class="text-center mb-3 mt-4">📜 Histórico de Trocas</h4>
-    <div class="d-flex flex-wrap justify-content-center" style="gap: 10px;">
-        {% if trocas_aceitas %}
-            {% for troca in trocas_aceitas %}
-            <div class="card shadow-sm border-info rounded-2" style="max-width: 200px;">
-                <div class="card-body p-2">
-                    <h6 class="card-title">📚 Troca Realizada</h6>
-                    {% if troca.usuario_solicitante.id == request.session.usuarios %}
-                        <p class="mb-1"><small><strong>Recebido:</strong> {{ troca.livro_oferecido.nome_livro }}</small></p>
-                        <p class="mb-1"><small><strong>Enviado:</strong> {{ troca.livro_solicitado.nome_livro }}</small></p>
-                    {% elif troca.usuario_oferecedor.id == request.session.usuarios %}
-                        <p class="mb-1"><small><strong>Recebido:</strong> {{ troca.livro_solicitado.nome_livro }}</small></p>
-                        <p class="mb-1"><small><strong>Enviado:</strong> {{ troca.livro_oferecido.nome_livro }}</small></p>
-                    {% endif %}
-                    <p class="mb-1"><small><strong>Data:</strong> {{ troca.data_proposta|date:"d/m/Y" }}</small></p>
-                    <button class="btn btn-success btn-sm w-100 mt-1" disabled>
-                        <i class="fas fa-check-circle"></i> Concluída
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12 text-center">
-                <p class="text-muted">🚫 Nenhuma troca realizada até o momento.</p>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Seção 3: Livros de Outros Usuários -->
-    <h4 class="text-center mb-3 mt-4">🌍 Livros de Outros Usuários Disponíveis para Troca</h4>
-    <div class="d-flex flex-wrap justify-content-center" style="gap: 10px;">
+    <!-- Seção: Livros de Outros Usuários -->
+    <h4 class="text-center mt-5">🌍 Livros de Outros Usuários</h4>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
         {% if livros_outros %}
             {% for livro in livros_outros %}
-            <div class="card shadow-sm border-success rounded-2" style="max-width: 200px;">
+            <div class="card livro-card">
                 <div class="position-relative">
                     {% if livro.imagem_upload %}
-                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top">
                     {% elif livro.imagem_link %}
-                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{{ livro.imagem_link }}" alt="{{ livro.nome_livro }}" class="card-img-top">
                     {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top rounded-top img-fluid" style="height: 300px; object-fit: cover;">
+                        <img src="{% static 'img/placeholder.png' %}" alt="Imagem não disponível" class="card-img-top">
                     {% endif %}
                 </div>
-                <div class="card-body p-2">
-                    <h6 class="card-title text-truncate">{{ livro.nome_livro }}</h6>
-                    <p class="mb-1"><small><strong>Autor:</strong> {{ livro.autor }}</small></p>
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-info btn-sm">Detalhes</a>
-                        {% if livro.status_troca == 'Pendente' %}
-                            <button class="btn btn-warning btn-sm" disabled>Solicitada</button>
-                        {% elif livro.status_troca == 'Aceita' %}
-                            <button class="btn btn-success btn-sm" disabled>Aceita</button>
-                        {% elif livro.status_troca == 'Rejeitada' %}
-                            <button class="btn btn-danger btn-sm" disabled>Rejeitada</button>
-                        {% else %}
-                            <a href="{% url 'propor_troca' livro.id %}" class="btn btn-outline-success btn-sm">Propor Troca</a>
-                        {% endif %}
-                    </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ livro.nome_livro }}</h6>
+                    <p class="text-muted"><strong>Autor:</strong> {{ livro.autor }}</p>
+                    {% if livro.status_troca == 'Pendente' %}
+                        <button class="btn btn-warning btn-sm" disabled>Troca Solicitada</button>
+                    {% elif livro.status_troca == 'Aceita' %}
+                        <button class="btn btn-success btn-sm" disabled>Troca Aceita</button>
+                    {% elif livro.status_troca == 'Rejeitada' %}
+                        <button class="btn btn-danger btn-sm" disabled>Troca Rejeitada</button>
+                    {% else %}
+                        <a href="{% url 'propor_troca' livro.id %}" class="btn btn-outline-success btn-sm">Propor Troca</a>
+                    {% endif %}
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted text-center">🚫 Nenhum livro de outros usuários disponível.</p>
+        {% endif %}
+        <br>
+    </div>
+    <br>
+<br>
+</div>
+
+
+<!-- Barra Lateral: Histórico de Trocas -->
+<div class="sidebar">
+    <h4 class="text-center mb-3">📜 Histórico de Trocas</h4>
+    <div class="d-flex flex-column gap-3">
+        {% if trocas_aceitas %}
+            {% for troca in trocas_aceitas %}
+            <div class="card troca-card">
+                <div class="card-body">
+                    <h6 class="card-title">📚 Troca Realizada</h6>
+                    <p><strong>Recebido:</strong> {{ troca.livro_oferecido.nome_livro }}</p>
+                    <p><strong>Enviado:</strong> {{ troca.livro_solicitado.nome_livro }}</p>
+                    <p class="text-muted"><strong>Data:</strong> {{ troca.data_proposta|date:"d/m/Y" }}</p>
+                    <button class="btn btn-success w-100">Concluída</button>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div class="col-12 text-center">
-                <p class="text-muted">🚫 Nenhum livro de outros usuários disponível para troca no momento.</p>
-            </div>
+            <p class="text-muted text-center">🚫 Nenhuma troca realizada até o momento.</p>
         {% endif %}
+        <br>
     </div>
+    <br>
 </div>
+<br>
 {% endblock %}

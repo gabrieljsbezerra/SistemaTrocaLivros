@@ -31,7 +31,15 @@
                             <button class="btn btn-secondary btn-sm" disabled><i class="fas fa-lock"></i> Disponibilizado</button>
                         </div>
                     </div>
-                    <a href="{% url 'gerenciar_troca' livro.id %}" class="btn btn-success btn-sm">Gerenciar Troca</a>
+                    {% if livro.status_troca == 'Pendente' %}
+                        <a href="{% url 'gerenciar_troca' livro.troca_id %}" class="btn btn-primary btn-sm">Gerenciar Troca</a>
+                    {% elif livro.status_troca == 'Aceita' %}
+                        <button class="btn btn-success btn-sm" disabled>Troca Aceita</button>
+                    {% elif livro.status_troca == 'Rejeitada' %}
+                        <button class="btn btn-danger btn-sm" disabled>Troca Rejeitada</button>
+                    {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Troca Não Disponível</button>
+                    {% endif %}
                 </div>
             </div>
             
@@ -64,7 +72,6 @@
                         <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
                         <p class="card-text text-muted"><small>Cadastrado em: {{ livro.data_cadastro|date:"d/m/Y" }}</small></p>
 
-                        <!-- Verificação do Status da Troca -->
                         <!-- Verificação do Status da Troca -->
                         {% if livro.status_troca == 'Pendente' %}
                         <button class="btn btn-warning btn-sm" disabled><i class="fas fa-hourglass-half"></i> Troca Solicitada</button>

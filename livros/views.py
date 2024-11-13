@@ -189,8 +189,51 @@ def detalhes_livro(request, id):
     livro = get_object_or_404(TabelaLivros, id=id)
     return render(request, 'detalhes_livro.html', {'livro': livro})
 
-
 def listar_livros_para_troca(request):
+    usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
+
+    # Livros do próprio usuário
+    livros_usuario = TabelaLivros.objects.filter(usuario=usuario, disponivel_para_troca=True)
+
+    # Livros de outros usuários disponíveis para troca
+    livros_outros = TabelaLivros.objects.filter(disponivel_para_troca=True).exclude(usuario=usuario)
+
+    # Obter as trocas onde o usuário é o oferecedor ou o solicitante
+    trocas_oferecidas = TabelaTrocas.objects.filter(usuario_oferecedor=usuario)
+    trocas_recebidas = TabelaTrocas.objects.filter(usuario_solicitante=usuario)
+
+    # Criar um dicionário para armazenar o status e o ID da troca para ambos os casos
+    trocas_dict = {}
+    for troca in trocas_oferecidas:
+        trocas_dict[troca.livro_oferecido_id] = {
+            'status': troca.status,
+            'troca_id': troca.id
+        }
+
+    for troca in trocas_recebidas:
+        trocas_dict[troca.livro_solicitado_id] = {
+            'status': troca.status,
+            'troca_id': troca.id
+        }
+
+    # Adicionar o status de troca aos livros de outros usuários
+    for livro in livros_outros:
+        livro.status_troca = trocas_dict.get(livro.id, {}).get('status', None)
+        livro.troca_id = trocas_dict.get(livro.id, {}).get('troca_id', None)
+
+    # Adicionar o status de troca aos livros do próprio usuário
+    for livro in livros_usuario:
+        livro.status_troca = trocas_dict.get(livro.id, {}).get('status', None)
+        livro.troca_id = trocas_dict.get(livro.id, {}).get('troca_id', None)
+
+    context = {
+        'livros_usuario': livros_usuario,
+        'livros_outros': livros_outros,
+    }
+
+    return render(request, 'listar_livros_para_troca.html', context)
+
+'''def listar_livros_para_troca(request):
     usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
 
     # Livros do próprio usuário
@@ -206,15 +249,16 @@ def listar_livros_para_troca(request):
     # Adicionar o status de troca aos livros de outros usuários
     for livro in livros_outros:
         livro.status_troca = trocas_dict.get(livro.id, None)
+    
+    for livro in livros_usuario:
+        livro.status_troca = trocas_dict.get(livro.id, None)
 
     context = {
         'livros_usuario': livros_usuario,
         'livros_outros': livros_outros,
     }
 
-    return render(request, 'listar_livros_para_troca.html', context)
-
-
+    return render(request, 'listar_livros_para_troca.html', context)'''
 
 
 def propor_troca(request, id):
@@ -242,6 +286,12 @@ def propor_troca(request, id):
 
 def gerenciar_troca(request, id):
     troca = get_object_or_404(TabelaTrocas, id=id)
+
+    # Verificar se o usuário logado é o oferecedor ou o solicitante
+    usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
+    if usuario != troca.usuario_oferecedor and usuario != troca.usuario_solicitante:
+        return redirect('listar_livros_para_troca')
+
     if request.method == 'POST':
         acao = request.POST.get('acao')
         if acao == 'aceitar':
@@ -257,5 +307,7 @@ def gerenciar_troca(request, id):
         elif acao == 'recusar':
             troca.status = 'Rejeitada'
             troca.save()
-        return redirect('listar_trocas')
+
+        return redirect('listar_livros_para_troca')
+
     return render(request, 'gerenciar_troca.html', {'troca': troca})

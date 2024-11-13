@@ -1,11 +1,61 @@
 {% extends 'base_logado.html' %}
+{% load static %}
 {% block conteudo %}
-<h2>Gerenciar Troca</h2>
-<p>Livro Oferecido: {{ troca.livro_oferecido.nome_livro }}</p>
-<p>Livro Solicitado: {{ troca.livro_solicitado.nome_livro }}</p>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit" name="acao" value="aceitar" class="btn btn-success">Aceitar</button>
-    <button type="submit" name="acao" value="recusar" class="btn btn-danger">Recusar</button>
-</form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="fas fa-exchange-alt"></i> Gerenciar Troca</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <!-- Livro Oferecido -->
+                        <div class="col-md-6 text-center">
+                            <h5 class="text-muted">📚 Livro Oferecido</h5>
+                            <p class="lead">{{ troca.livro_oferecido.nome_livro }}</p>
+                            {% if troca.livro_oferecido.imagem_upload %}
+                            <img src="{{ troca.livro_oferecido.imagem_upload.url }}" class="img-fluid rounded shadow-sm"
+                                style="height: 200px; object-fit: cover;">
+                            {% elif troca.livro_oferecido.imagem_link %}
+                            <img src="{{ troca.livro_oferecido.imagem_link }}" class="img-fluid rounded shadow-sm"
+                                style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded shadow-sm"
+                                style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+
+                        <!-- Livro Solicitado -->
+                        <div class="col-md-6 text-center">
+                            <h5 class="text-muted">📖 Livro Solicitado</h5>
+                            <p class="lead">{{ troca.livro_solicitado.nome_livro }}</p>
+                            {% if troca.livro_solicitado.imagem_upload %}
+                            <img src="{{ troca.livro_solicitado.imagem_upload.url }}"
+                                class="img-fluid rounded shadow-sm" style="height: 200px; object-fit: cover;">
+                            {% elif troca.livro_solicitado.imagem_link %}
+                            <img src="{{ troca.livro_solicitado.imagem_link }}" class="img-fluid rounded shadow-sm"
+                                style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded shadow-sm"
+                                style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Ações de Gerenciamento -->
+                    <form method="POST" class="text-center">
+                        {% csrf_token %}
+                        <button type="submit" name="acao" value="aceitar" class="btn btn-success btn-lg mx-2">
+                            <i class="fas fa-check-circle"></i> Aceitar
+                        </button>
+                        <button type="submit" name="acao" value="recusar" class="btn btn-danger btn-lg mx-2">
+                            <i class="fas fa-times-circle"></i> Recusar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

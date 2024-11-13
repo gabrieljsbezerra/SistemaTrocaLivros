@@ -198,11 +198,11 @@ def listar_livros_para_troca(request):
     # Livros de outros usuários disponíveis para troca
     livros_outros = TabelaLivros.objects.filter(disponivel_para_troca=True).exclude(usuario=usuario)
 
-    # Obter as trocas onde o usuário é o oferecedor ou o solicitante
+    # Obter todas as trocas onde o usuário é o oferecedor ou o solicitante
     trocas_oferecidas = TabelaTrocas.objects.filter(usuario_oferecedor=usuario)
     trocas_recebidas = TabelaTrocas.objects.filter(usuario_solicitante=usuario)
 
-    # Criar um dicionário para armazenar o status e o ID da troca para ambos os casos
+    # Criar um dicionário para armazenar o status e o ID da troca
     trocas_dict = {}
     for troca in trocas_oferecidas:
         trocas_dict[troca.livro_oferecido_id] = {
@@ -218,58 +218,63 @@ def listar_livros_para_troca(request):
 
     # Adicionar o status de troca aos livros de outros usuários
     for livro in livros_outros:
-        livro.status_troca = trocas_dict.get(livro.id, {}).get('status', None)
-        livro.troca_id = trocas_dict.get(livro.id, {}).get('troca_id', None)
+        if livro.id in trocas_dict:
+            livro.status_troca = trocas_dict[livro.id]['status']
+            livro.troca_id = trocas_dict[livro.id]['troca_id']
+        else:
+            # Verificar se o usuário atual já propôs uma troca para este livro
+            troca_existente = TabelaTrocas.objects.filter(
+                livro_solicitado=livro, usuario_oferecedor=usuario, status='Pendente'
+            ).first()
+            if troca_existente:
+                livro.status_troca = 'Pendente'
+                livro.troca_id = troca_existente.id
+            else:
+                livro.status_troca = None
+                livro.troca_id = None
 
     # Adicionar o status de troca aos livros do próprio usuário
     for livro in livros_usuario:
         livro.status_troca = trocas_dict.get(livro.id, {}).get('status', None)
         livro.troca_id = trocas_dict.get(livro.id, {}).get('troca_id', None)
 
+    # Obter o histórico de trocas aceitas
+    trocas_aceitas = TabelaTrocas.objects.filter(
+        (Q(usuario_oferecedor=usuario) | Q(usuario_solicitante=usuario)),
+        status='Aceita'
+    )
+
     context = {
         'livros_usuario': livros_usuario,
         'livros_outros': livros_outros,
+        'trocas_aceitas': trocas_aceitas,
     }
 
     return render(request, 'listar_livros_para_troca.html', context)
 
-'''def listar_livros_para_troca(request):
-    usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
-
-    # Livros do próprio usuário
-    livros_usuario = TabelaLivros.objects.filter(usuario=usuario, disponivel_para_troca=True)
-
-    # Livros de outros usuários disponíveis para troca
-    livros_outros = TabelaLivros.objects.filter(disponivel_para_troca=True).exclude(usuario=usuario)
-
-    # Obter as trocas solicitadas pelo usuário
-    trocas_solicitadas = TabelaTrocas.objects.filter(usuario_oferecedor=usuario)
-    trocas_dict = {troca.livro_solicitado_id: troca.status for troca in trocas_solicitadas}
-
-    # Adicionar o status de troca aos livros de outros usuários
-    for livro in livros_outros:
-        livro.status_troca = trocas_dict.get(livro.id, None)
-    
-    for livro in livros_usuario:
-        livro.status_troca = trocas_dict.get(livro.id, None)
-
-    context = {
-        'livros_usuario': livros_usuario,
-        'livros_outros': livros_outros,
-    }
-
-    return render(request, 'listar_livros_para_troca.html', context)'''
 
 
 def propor_troca(request, id):
     if request.session.get('usuarios'):
         livro_solicitado = get_object_or_404(TabelaLivros, id=id)
+        usuario_id = request.session.get('usuarios')
+
+        # Filtrar os livros do usuário que estão disponíveis para troca e não estão em trocas pendentes
         meus_livros = TabelaLivros.objects.filter(
-            usuario_id=request.session.get('usuarios'), disponivel_para_troca=False)
+            usuario_id=usuario_id,
+            disponivel_para_troca=True
+        ).exclude(
+            id__in=TabelaTrocas.objects.filter(
+                usuario_oferecedor_id=usuario_id,
+                status='Pendente'
+            ).values_list('livro_oferecido_id', flat=True)
+        )
 
         if request.method == 'POST':
             livro_oferecido_id = request.POST.get('livro_oferecido')
             livro_oferecido = TabelaLivros.objects.get(id=livro_oferecido_id)
+
+            # Criar uma nova troca
             nova_troca = TabelaTrocas(
                 livro_oferecido=livro_oferecido,
                 livro_solicitado=livro_solicitado,
@@ -279,11 +284,15 @@ def propor_troca(request, id):
                 status='Pendente'
             )
             nova_troca.save()
+
+            messages.success(request, 'Troca proposta com sucesso!')
             return redirect('listar_livros_para_troca')
-        return render(request, 'propor_troca.html', {'livro_solicitado': livro_solicitado, 'meus_livros': meus_livros})
+
+        return render(request, 'propor_troca.html', {
+            'livro_solicitado': livro_solicitado,
+            'meus_livros': meus_livros
+        })
     return redirect('login')
-
-
 def gerenciar_troca(request, id):
     troca = get_object_or_404(TabelaTrocas, id=id)
 
@@ -300,13 +309,25 @@ def gerenciar_troca(request, id):
 
             # Transferir a propriedade dos livros
             troca.livro_oferecido.usuario = troca.usuario_solicitante
+            troca.livro_oferecido.disponivel_para_troca = False
             troca.livro_oferecido.save()
 
             troca.livro_solicitado.usuario = troca.usuario_oferecedor
+            troca.livro_solicitado.disponivel_para_troca = False
             troca.livro_solicitado.save()
+
+            messages.success(request, 'Troca aceita e propriedade dos livros atualizada com sucesso!')
+
         elif acao == 'recusar':
-            troca.status = 'Rejeitada'
-            troca.save()
+            # Marcar os livros como disponíveis para troca
+            troca.livro_oferecido.disponivel_para_troca = True
+            troca.livro_solicitado.disponivel_para_troca = True
+            troca.livro_oferecido.save()
+            troca.livro_solicitado.save()
+
+            # Deletar a troca
+            troca.delete()
+            messages.info(request, 'Troca rejeitada e a solicitação foi removida.')
 
         return redirect('listar_livros_para_troca')
 

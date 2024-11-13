@@ -11,7 +11,6 @@
             {% for livro in livros_usuario %}
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="card shadow-sm h-100 border-primary">
-                    <!-- Imagem do Livro -->
                     {% if livro.imagem_upload %}
                         <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
                     {% elif livro.imagem_link %}
@@ -21,28 +20,22 @@
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title text-truncate">{{ livro.nome_livro }}</h5>
-                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
-                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
-                        <p class="card-text text-muted"><small>Cadastrado em: {{ livro.data_cadastro|date:"d/m/Y" }}</small></p>
+                        <p><strong>Autor:</strong> {{ livro.autor }}</p>
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-info btn-sm">
-                                <i class="fas fa-info-circle"></i> Detalhes
-                            </a>
-                            <button class="btn btn-secondary btn-sm" disabled><i class="fas fa-lock"></i> Disponibilizado</button>
+                            <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-info btn-sm">Detalhes</a>
+                            {% if livro.status_troca == 'Pendente' %}
+                                <a href="{% url 'gerenciar_troca' livro.troca_id %}" class="btn btn-primary btn-sm">Gerenciar Troca</a>
+                            {% elif livro.status_troca == 'Aceita' %}
+                                <button class="btn btn-success btn-sm" disabled>Troca Aceita</button>
+                            {% elif livro.status_troca == 'Rejeitada' %}
+                                <button class="btn btn-danger btn-sm" disabled>Troca Rejeitada</button>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>Troca Não Disponível</button>
+                            {% endif %}
                         </div>
                     </div>
-                    {% if livro.status_troca == 'Pendente' %}
-                        <a href="{% url 'gerenciar_troca' livro.troca_id %}" class="btn btn-primary btn-sm">Gerenciar Troca</a>
-                    {% elif livro.status_troca == 'Aceita' %}
-                        <button class="btn btn-success btn-sm" disabled>Troca Aceita</button>
-                    {% elif livro.status_troca == 'Rejeitada' %}
-                        <button class="btn btn-danger btn-sm" disabled>Troca Rejeitada</button>
-                    {% else %}
-                        <button class="btn btn-secondary btn-sm" disabled>Troca Não Disponível</button>
-                    {% endif %}
                 </div>
             </div>
-            
             {% endfor %}
         {% else %}
             <div class="col-12 text-center">
@@ -51,14 +44,37 @@
         {% endif %}
     </div>
 
-    <!-- Seção 2: Livros de Outros Usuários -->
+    <!-- Seção 2: Histórico de Trocas -->
+    <h4 class="text-center mb-3">📜 Histórico de Trocas</h4>
+    <div class="row justify-content-center">
+        {% if trocas_aceitas %}
+            {% for troca in trocas_aceitas %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card shadow-sm h-100 border-info">
+                    <div class="card-body">
+                        <h5 class="card-title">📚 Troca Realizada</h5>
+                        <p><strong>Seu Livro:</strong> {{ troca.livro_oferecido.nome_livro }}</p>
+                        <p><strong>Livro Recebido:</strong> {{ troca.livro_solicitado.nome_livro }}</p>
+                        <p><strong>Data da Troca:</strong> {{ troca.data_proposta|date:"d/m/Y" }}</p>
+                        <button class="btn btn-success btn-sm" disabled><i class="fas fa-check-circle"></i> Troca Concluída</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">🚫 Nenhuma troca realizada até o momento.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Seção 3: Livros de Outros Usuários -->
     <h4 class="text-center mb-3">🌍 Livros de Outros Usuários Disponíveis para Troca</h4>
     <div class="row justify-content-center">
         {% if livros_outros %}
             {% for livro in livros_outros %}
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="card shadow-sm h-100 border-success">
-                    <!-- Imagem do Livro -->
                     {% if livro.imagem_upload %}
                         <img src="{{ livro.imagem_upload.url }}" alt="{{ livro.nome_livro }}" class="card-img-top img-fluid rounded">
                     {% elif livro.imagem_link %}
@@ -68,23 +84,19 @@
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title text-truncate">{{ livro.nome_livro }}</h5>
-                        <p class="card-text"><strong>Autor:</strong> {{ livro.autor }}</p>
-                        <p class="card-text"><strong>Editora:</strong> {{ livro.editora }}</p>
-                        <p class="card-text text-muted"><small>Cadastrado em: {{ livro.data_cadastro|date:"d/m/Y" }}</small></p>
-
-                        <!-- Verificação do Status da Troca -->
-                        {% if livro.status_troca == 'Pendente' %}
-                        <button class="btn btn-warning btn-sm" disabled><i class="fas fa-hourglass-half"></i> Troca Solicitada</button>
-                        {% elif livro.status_troca == 'Aceita' %}
-                        <button class="btn btn-success btn-sm" disabled><i class="fas fa-check-circle"></i> Troca Aceita</button>
-                        {% elif livro.status_troca == 'Rejeitada' %}
-                        <button class="btn btn-danger btn-sm" disabled><i class="fas fa-times-circle"></i> Troca Rejeitada</button>
-                        {% else %}
-                        <a href="{% url 'propor_troca' livro.id %}" class="btn btn-outline-success btn-sm">
-                            <i class="fas fa-exchange-alt"></i> Propor Troca
-                        </a>
-                        {% endif %}
-
+                        <p><strong>Autor:</strong> {{ livro.autor }}</p>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-info btn-sm">Detalhes</a>
+                            {% if livro.status_troca == 'Pendente' %}
+                                <button class="btn btn-warning btn-sm" disabled>Troca Solicitada</button>
+                            {% elif livro.status_troca == 'Aceita' %}
+                                <button class="btn btn-success btn-sm" disabled>Troca Aceita</button>
+                            {% elif livro.status_troca == 'Rejeitada' %}
+                                <button class="btn btn-danger btn-sm" disabled>Troca Rejeitada</button>
+                            {% else %}
+                                <a href="{% url 'propor_troca' livro.id %}" class="btn btn-outline-success btn-sm">Propor Troca</a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

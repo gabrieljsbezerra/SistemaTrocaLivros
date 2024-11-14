@@ -52,6 +52,11 @@
 </style>
 
 <section class="vh-100">
+    <div class="container my-3 text-center">
+        <button class="btn btn-primary btn-read-aloud" data-text="Nesta página é possível cadastrar seus livros. Informando seu título, autor, editora, categoria, além de ser possível adicionar uma imagem ao cadastro.">
+            🔊 Ler Página em Voz Alta
+        </button>
+    </div>
     <div class="container h-100 d-flex justify-content-center align-items-center">
         <div class="form-container">
             <h4 class="text-center fw-bold mb-3">📖 Cadastrar Novo Livro</h4>
@@ -116,5 +121,5 @@
     </div>
 </section>
 
-<script src="{% static 'js/preview.js' %}"></script>
+<script src="{% static 'js/preview.js' %}" defer></script>
 {% endblock %}

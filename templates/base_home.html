@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="pt-BR">
+{% load static %}
 <head>
+ 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -41,7 +43,7 @@
         footer {
             width: 100%;
         }
-        
+
     </style>
 </head>
 <body>
@@ -76,6 +78,13 @@
         </div>
     </nav>
 
+    <!-- Botão para leitura em voz alta -->
+    <div class="container my-3 text-center">
+        <button class="btn btn-primary btn-read-aloud" data-text="Bem-vindo ao Sistema de Troca de Livros - Sebo Online. Aqui você pode gerenciar seus livros e realizar trocas com outros usuários. Explore o site para mais opções.">
+            🔊 Ler Página em Voz Alta
+        </button>
+    </div>
+
 
     <!-- Conteúdo Principal em layout vertical -->
     <div class="content">
@@ -92,5 +101,6 @@
 
     <!-- Optional JavaScript; Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/preview.js' %}" defer></script>
 </body>
 </html>

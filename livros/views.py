@@ -15,11 +15,9 @@ from django.contrib.auth.models import User
 
 def home(request):
     if request.session.get('usuarios'):
-        usuario = TabelaUsuarios.objects.get(
-            id=request.session['usuarios']).nome_usuario
+        usuario = TabelaUsuarios.objects.get(id=request.session['usuarios']).nome_usuario
         livros = TabelaLivros.objects.all()
-        return render(request, 'home.html', {'livros': livros})
-
+        return render(request, 'home.html', {'livros': livros, 'nome_usuario': usuario})
     else:
         return redirect(f"{reverse('login')}?status=2")
 
@@ -28,7 +26,7 @@ def meus_livros(request):
     if request.session.get('usuarios'):
         usuario = TabelaUsuarios.objects.get(id=request.session['usuarios'])
         livros = TabelaLivros.objects.filter(usuario=usuario)
-        return render(request, 'meus_livros.html', {'livros': livros})
+        return render(request, 'meus_livros.html', {'livros': livros, 'nome_usuario': usuario})
     else:
         return redirect(f"{reverse('login')}?status=2")
 

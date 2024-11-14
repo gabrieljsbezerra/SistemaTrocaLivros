@@ -40,7 +40,15 @@
         footer {
             width: 100%;
         }
-    </style>
+        .navbar .fa-user-circle {
+        font-size: 1.2rem;
+        color: #ffc107; /* Cor amarela para destacar o ícone */
+        }
+
+        .navbar .nav-link.text-white {
+            font-weight: bold;
+        }
+        </style>
 </head>
 <body>
     <!-- Navbar para usuários logados -->
@@ -60,6 +68,12 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    <!-- Exibição do Nome do Usuário -->
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="nav-link text-white">
+                            <i class="fas fa-user-circle me-1"></i> {{ nome_usuario }}
+                        </span>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'sair' %}">Sair</a>
                     </li>
